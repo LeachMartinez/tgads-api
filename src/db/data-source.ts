@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { User } from "./models/User";
+import { AuthToken } from "./models/AuthToken";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
   database: "tgads_development",
   synchronize: true,
   logging: true,
-  entities: [User],
+  entities: [User, AuthToken],
   subscribers: [],
   migrations: [],
 

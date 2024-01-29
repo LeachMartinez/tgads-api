@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { AppDataSource } from 'src/db/data-source';
-import { AuthToken } from 'src/db/models/AuthToken';
-import { User } from 'src/db/models/User';
+import { AppDataSource } from '../db/data-source';
+import { AuthToken } from '../db/models/AuthToken';
+import { User } from '../db/models/User';
 import { Repository } from 'typeorm';
 
 export class AuthorizationService {
@@ -11,6 +11,8 @@ export class AuthorizationService {
   private authToken: Repository<AuthToken>
 
   public static hashPassword(password: string) {
+    console.log(password);
+    
     return bcrypt.hashSync(password, this.salt) as string;
   }
 
@@ -19,6 +21,8 @@ export class AuthorizationService {
   }
 
   generateToken(payload: Omit<User, "password">) {
+    console.log(payload);
+    
     const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {expiresIn: "2h"})
     const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, { expiresIn: "30d" });
 
@@ -46,26 +50,33 @@ export class AuthorizationService {
     }
   }
 
-  async saveToken(userId, refreshToken) {
-    // const tokenData = await authToken.findOne({ where: { userId } });
+  async saveToken(userId: number, refreshToken: string) {
+    const tokenData = await this.authToken.findOneBy({
+      user: {
+        id: userId
+      }
+    });
 
-    // if (tokenData) {
-    //   tokenData.refreshToken = refreshToken;
-    //   return await tokenData.save();
-    // }
+    if (tokenData) {
+      tokenData.refreshToken = refreshToken;
+      return await this.authToken.save(tokenData);
+    }
 
-    // const token = await UserToken.create({ refreshToken, userId });
+    const token = await this.authToken.create({
+      refreshToken,
+      user: {
+        id: userId
+      }
+    });
 
-    // return token;
+    return token
   }
 
-  async removeToken(refreshToken) {
-    // const tokenData = await UserToken.destroy({ where: { refreshToken } });
-    // return tokenData;
+  async removeToken(refreshToken: string) {
+    return await this.authToken.delete({ refreshToken });
   }
 
-  async findToken(refreshToken) {
-    // const tokenData = await UserToken.findOne({ where: { refreshToken } });
-    // return tokenData;
+  async findToken(refreshToken: string) {
+    return await this.authToken.findOneBy({ refreshToken })
   }
 }

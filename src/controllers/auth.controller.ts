@@ -12,8 +12,8 @@ export class AuthController {
   }
 
   @Post("/sign_up")
-  signUp(@Body() body: User) {
+  async signUp(@Body() body: Omit<User, "id">) {;
     const userService = new UserService();
-    userService.register(body);
+    return await userService.register(body);
   }
 }

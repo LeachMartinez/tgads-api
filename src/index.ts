@@ -7,6 +7,8 @@ import 'dotenv/config'
 import log4js from 'log4js'
 import { AppDataSource } from './db/data-source'
 import { AuthController } from './controllers/auth.controller'
+import authMiddleware from './middlewares/auth.middleware'
+import { UserController } from './controllers/user.controller'
 
 const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL ?? 'debug'
@@ -26,7 +28,8 @@ app.use(cors() as RequestHandler)
 app.use(httpContext.middleware)
 
 useExpressServer(app, {
-  controllers: [AuthController]
+  authorizationChecker: authMiddleware,
+  controllers: [AuthController, UserController]
 })
 
 app.use((req, res, next) => {
