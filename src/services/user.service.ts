@@ -7,20 +7,29 @@ import { AuthToken } from "../db/models/AuthToken";
 
 export class UserService {
   async register(user: Omit<User, "id">) {
+    const userRepository = AppDataSource.getRepository(User);
+    const findedUser = await userRepository.find({
+      where: [
+        { login: user.login },
+        { email: user.email }
+      ]
+    });
+
+    if (findedUser.length) return "Пользователь уже зарегистрирован!"
+
     const newUser = new User();
     newUser.email = user.email;
     newUser.login = user.login;
     newUser.name = user.name;
-    newUser.password = AuthorizationService.hashPassword(user.password);
+    newUser.password = AuthorizationService.hashPassword(user.password)
     
     const errors = await validate(newUser);
 
     if (errors.length) {
-      getLogger().warn("Новый пользователь не зарегистрировался, валидация не пройдена", errors)
-      return errors;
+      getLogger().warn("Новый пользователь не зарегистрировался, валидация не пройдена", errors.flatMap(err => ({ error: err.constraints, target: err.property, value: err.value })))
+      return errors.flatMap(err => ({ error: err.constraints, target: err.property }));
     }
 
-    const userRepository = AppDataSource.getRepository(User);
     const tokenRepository = AppDataSource.getRepository(AuthToken);
 
     const createdUser = await userRepository.save(newUser);

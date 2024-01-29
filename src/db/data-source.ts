@@ -14,5 +14,4 @@ export const AppDataSource = new DataSource({
   entities: [User, AuthToken],
   subscribers: [],
   migrations: [],
-
 })
