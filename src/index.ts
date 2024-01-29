@@ -14,12 +14,12 @@ const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL ?? 'debug'
 
 AppDataSource.initialize()
-.then(() => {
-  logger.info('Data Source has been initialized!')
-})
-.catch((err) => {
-  logger.info('Error during Data Source initialization:', err)
-})
+  .then(() => {
+    logger.info('Data Source has been initialized!')
+  })
+  .catch((err) => {
+    logger.info('Error during Data Source initialization:', err)
+  })
 
 const app: express.Express = express()
 
