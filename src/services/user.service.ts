@@ -5,6 +5,7 @@ import { getLogger } from 'log4js'
 import { AppDataSource } from '../db/data-source'
 import { AuthToken } from '../db/models/AuthToken'
 import { type Repository } from 'typeorm'
+import { type Response } from 'express'
 
 export class UserService {
   private readonly userRepository: Repository<User>
@@ -53,5 +54,24 @@ export class UserService {
 
   async auth (body: Pick<Partial<User>, 'email' | 'password' | 'login'>) {
     return 'Ok'
+  }
+
+  async refresh (token: string, response: Response) {
+    if (!token) return response.status(403);
+
+    const authorizationService = new AuthorizationService();
+    const result = await authorizationService.validateRefreshToken(token);
+
+    if (result === null) return response.status(403)
+
+    const currentToken = await this.tokenRepository.findOneBy({
+      refreshToken: token
+    });
+
+    if (!currentToken) return response.status(403)
+    
+    const accessToken = authorizationService.generateToken(result, 'access');
+
+    return accessToken
   }
 }

@@ -20,12 +20,13 @@ export class AuthorizationService {
     this.authToken = AppDataSource.getRepository(AuthToken)
   }
 
-  generateToken (payload: Omit<User, 'password'>): {
-    accessToken: string
-    refreshToken: string
-  } {
+  generateToken (payload: Omit<User, 'password'>, variant = 'all' as 'access' | 'all') {
     const accessToken = jwt.sign(payload, this.JWT_ACCESS_SECRET, { expiresIn: '2h' })
     const refreshToken = jwt.sign(payload, this.JWT_REFRESH_SECRET, { expiresIn: '30d' })
+
+    if (variant === 'access') {
+      return { accessToken }
+    }
 
     return {
       accessToken,
