@@ -23,6 +23,6 @@ export class AuthController {
 
   @Get('/refresh')
   async refresh(@HeaderParam("authorization") token: string, @Res() response: Response) {
-    this.userService.refresh(token.split(" ")[1], response)
+    return this.userService.refresh(token.split(" ")[1], response)
   }
 }

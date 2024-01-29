@@ -40,7 +40,12 @@ export class UserService {
     }
 
     const createdUser = await this.userRepository.save(newUser)
-    const tokens = new AuthorizationService().generateToken({ ...createdUser })
+    const tokens = new AuthorizationService().generateToken({ 
+      id: createdUser.id,
+      email: createdUser.email,
+      login: createdUser.login,
+      name: createdUser.name
+    })
 
     await this.tokenRepository.save({
       refreshToken: tokens.refreshToken,
@@ -53,7 +58,7 @@ export class UserService {
   }
 
   async auth (body: Pick<Partial<User>, 'email' | 'password' | 'login'>) {
-    return 'Ok'
+    
   }
 
   async refresh (token: string, response: Response) {
@@ -70,7 +75,12 @@ export class UserService {
 
     if (!currentToken) return response.status(403)
     
-    const accessToken = authorizationService.generateToken(result, 'access');
+    const accessToken = authorizationService.generateToken({ 
+      id: result.id,
+      email: result.email,
+      login: result.login,
+      name: result.name
+    }, 'access') as { accessToken: string };
 
     return accessToken
   }

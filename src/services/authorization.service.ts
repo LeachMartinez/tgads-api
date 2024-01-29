@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import jwt, { JsonWebTokenError } from 'jsonwebtoken'
 import { AppDataSource } from '../db/data-source'
 import { AuthToken } from '../db/models/AuthToken'
 import { type User } from '../db/models/User'
@@ -20,8 +20,8 @@ export class AuthorizationService {
     this.authToken = AppDataSource.getRepository(AuthToken)
   }
 
-  generateToken (payload: Omit<User, 'password'>, variant = 'all' as 'access' | 'all') {
-    const accessToken = jwt.sign(payload, this.JWT_ACCESS_SECRET, { expiresIn: '2h' })
+  generateToken (payload: Omit<User, 'password' | 'created_at' | 'updated_at' | 'authTokens'>, variant = 'all' as 'access' | 'all') {
+    const accessToken = jwt.sign(payload, this.JWT_ACCESS_SECRET, { expiresIn: '2s' })
     const refreshToken = jwt.sign(payload, this.JWT_REFRESH_SECRET, { expiresIn: '30d' })
 
     if (variant === 'access') {
@@ -34,12 +34,11 @@ export class AuthorizationService {
     }
   }
 
-  async validateAccessToken (token: string): Promise<Omit<User, 'password'> | null> {
+  async validateAccessToken (token: string): Promise<string | Omit<User, 'password'>> {
     try {
-      const userData = jwt.verify(token, this.JWT_ACCESS_SECRET)
-      return userData as Omit<User, 'password'>
+      return jwt.verify(token, this.JWT_ACCESS_SECRET) as string | Omit<User, 'password'>
     } catch (e) {
-      return null
+      return e
     }
   }
 
