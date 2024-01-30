@@ -16,6 +16,10 @@ export class AuthorizationService {
     return bcrypt.hashSync(password, this.salt) as string
   }
 
+  public static comparePassword (password: string, hash: string): boolean {
+    return bcrypt.compareSync(password, hash)
+  }
+
   constructor () {
     this.authToken = AppDataSource.getRepository(AuthToken)
   }
