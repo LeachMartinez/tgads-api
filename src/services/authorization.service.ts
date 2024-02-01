@@ -4,6 +4,7 @@ import { AppDataSource } from '../db/data-source'
 import { AuthToken } from '../db/models/AuthToken'
 import { type User } from '../db/models/User'
 import { type Repository } from 'typeorm'
+import { type TJwtUser } from 'src/types/User'
 
 export class AuthorizationService {
   private static readonly saltRounds = 10
@@ -24,8 +25,8 @@ export class AuthorizationService {
     this.authToken = AppDataSource.getRepository(AuthToken)
   }
 
-  generateToken (payload: Omit<User, 'password' | 'created_at' | 'updated_at' | 'authTokens'>, variant = 'all' as 'access' | 'all') {
-    const accessToken = jwt.sign(payload, this.JWT_ACCESS_SECRET, { expiresIn: '2s' })
+  generateToken (payload: TJwtUser, variant = 'all' as 'access' | 'all') {
+    const accessToken = jwt.sign(payload, this.JWT_ACCESS_SECRET, { expiresIn: '1h' })
     const refreshToken = jwt.sign(payload, this.JWT_REFRESH_SECRET, { expiresIn: '30d' })
 
     if (variant === 'access') {
@@ -38,18 +39,18 @@ export class AuthorizationService {
     }
   }
 
-  async validateAccessToken (token: string): Promise<string | Omit<User, 'password'>> {
+  async validateAccessToken (token: string): Promise<string | TJwtUser> {
     try {
-      return jwt.verify(token, this.JWT_ACCESS_SECRET) as string | Omit<User, 'password'>
+      return jwt.verify(token, this.JWT_ACCESS_SECRET) as string | TJwtUser
     } catch (e) {
       return e
     }
   }
 
-  async validateRefreshToken (token: string): Promise<Omit<User, 'password'> | null> {
+  async validateRefreshToken (token: string): Promise<TJwtUser | null> {
     try {
       const userData = jwt.verify(token, this.JWT_REFRESH_SECRET)
-      return userData as Omit<User, 'password'>
+      return userData as TJwtUser
     } catch (e) {
       return null
     }

@@ -9,6 +9,7 @@ import { AppDataSource } from './db/data-source'
 import { AuthController } from './controllers/auth.controller'
 import authMiddleware from './middlewares/auth.middleware'
 import { UserController } from './controllers/user.controller'
+import { TelegramController } from './controllers/telegram.controller'
 
 const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL ?? 'debug'
@@ -29,7 +30,7 @@ app.use(httpContext.middleware)
 
 useExpressServer(app, {
   authorizationChecker: authMiddleware,
-  controllers: [AuthController, UserController]
+  controllers: [AuthController, UserController, TelegramController]
 })
 
 app.use((req, res, next) => {
