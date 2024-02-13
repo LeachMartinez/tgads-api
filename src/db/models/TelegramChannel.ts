@@ -6,19 +6,22 @@ export class TelegramChannel {
   @PrimaryGeneratedColumn()
     id: number
 
-  @Column()
+  @Column({ nullable: false })
     title: string
 
-  @Column()
+  @Column({ nullable: false })
     tgChannelId: string
 
-  @Column()
+  @Column({ unique: true })
     tgAccessHash: string
 
-  @Column()
+  @Column({ nullable: false, unique: true })
     tgUsername: string
 
   @Column()
+    about: string
+
+  @Column({ nullable: false, unique: true})
     link: string
 
   @CreateDateColumn()

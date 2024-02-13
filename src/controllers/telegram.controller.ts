@@ -26,7 +26,7 @@ export class TelegramController {
     return await telegram.auth("79321270292", body.phoneCode, body.phoneCodeHash)
   }
 
-  @Get('/telegram/chats')
+  @Get('/telegram/channels')
   async chats () {
     const session = await Telegram.getUserSession(18);
     const telegram = new TelegramChannels(18, session);

@@ -1,7 +1,10 @@
 export type TTelegramChannel = {
   title: string;
-  channelId: bigint;
-  accessHash: bigint;
+  channelId: string;
+  accessHash: string;
   username: string;
+  about?: string;
   link?: string;
+  photo?: string;
+  addedToPlatform?: boolean;
 }
