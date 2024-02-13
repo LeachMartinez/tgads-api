@@ -1,7 +1,8 @@
 import { IsEmail, Length } from 'class-validator'
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn } from 'typeorm'
 import { AuthToken } from './AuthToken'
-import { Telegram } from './Telegram'
+import { TelegramSession } from './TelegramSession'
+import { TelegramChannel } from './TelegramChannel'
 
 @Entity()
 export class User {
@@ -38,7 +39,11 @@ export class User {
   @OneToMany(() => AuthToken, (authToken) => authToken.user)
     authTokens: AuthToken[]
 
-  @OneToOne(() => Telegram, (telegram) => telegram.user) // specify inverse side as a second parameter
+  @OneToOne(() => TelegramSession, (telegram) => telegram.user)
   @JoinColumn()
-    telegram: Telegram
+    telegramSession: TelegramSession
+
+  @OneToMany(() => TelegramChannel, (telegramChannel) => telegramChannel.user)
+  @JoinColumn()
+    telegramChannels: TelegramChannel[]
 }

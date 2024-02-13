@@ -117,4 +117,8 @@ export class UserService {
 
     return accessToken
   }
+
+  async findUser(id: number) {
+    return await this.userRepository.findOneBy({ id });
+  }
 }

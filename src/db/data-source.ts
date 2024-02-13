@@ -1,7 +1,8 @@
 import { DataSource } from 'typeorm'
 import { User } from './models/User'
 import { AuthToken } from './models/AuthToken'
-import { Telegram } from './models/Telegram'
+import { TelegramSession } from './models/TelegramSession'
+import { TelegramChannel } from './models/TelegramChannel'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: 'tgads_development',
   synchronize: true,
   logging: true,
-  entities: [User, AuthToken, Telegram],
+  entities: [User, AuthToken, TelegramSession, TelegramChannel],
   subscribers: [],
   migrations: []
 })
