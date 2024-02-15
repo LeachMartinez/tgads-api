@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post } from 'routing-controllers'
+import { Body, Controller, Get, Param, Post } from 'routing-controllers'
 import TelegramConnection from '../services/telegram/connection.service'
 import Telegram from '../services/telegram/telegram.service'
 import TelegramChannels from '../services/telegram/channels.service'
-import { TTelegramChannel } from 'src/types/Telegram'
+import { TTelegramChannel } from '../types/Telegram'
+import TelegramStatistics from '../services/telegram/statistics.service'
 
 @Controller()
 export class TelegramController {
@@ -26,10 +27,25 @@ export class TelegramController {
     return await telegram.auth("79321270292", body.phoneCode, body.phoneCodeHash)
   }
 
-  @Get('/telegram/channels')
-  async chats () {
+  @Get('/telegram/saved_channels/:user_id') 
+  async savedChannels(@Param('user_id') user_id: string) {
+    if (!user_id) return;
+
+    return await Telegram.getSavedUserChannels(Number(user_id));
+  }
+
+  @Get("/telegram/stats")
+  async stats () {
     const session = await Telegram.getUserSession(18);
-    const telegram = new TelegramChannels(18, session);
+    const stats = new TelegramStatistics(18, session, 38)
+    console.log(await stats.analyze());
+    return "OK"
+  }
+
+  @Get('/telegram/channels/:user_id')
+  async channels (@Param('user_id') user_id: string) {
+    const session = await Telegram.getUserSession(Number(user_id));
+    const telegram = new TelegramChannels(Number(user_id), session);
     return await telegram.getUserChannels()
   }
 

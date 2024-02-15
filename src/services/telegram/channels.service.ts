@@ -11,12 +11,11 @@ export default class TelegramChannels extends Telegram {
 
   async getUserChannels() {
     await this.client.connect();
-    const userDialogs = await this.getUserDailogs();
-    const channelIds = this.getChannelIds(userDialogs as Api.messages.Dialogs);
+    const userDialogs = await this.getUserDailogs() as Api.messages.Dialogs;
+    const channelIds = this.getChannelIds(userDialogs);
     const channels = await this.getChannelsInfo(channelIds) as Api.messages.Chats;
     const userChannels = await this.getUserChannelsList(channels);
-    const getChannelsInfo = await this.getUserChannelsInfo(userChannels);
-    return getChannelsInfo;
+    return await this.getUserChannelsInfo(userChannels);
   }
 
   async saveChannels(userId: number, channels: TTelegramChannel[]) {

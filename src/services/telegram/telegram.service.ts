@@ -13,6 +13,8 @@ export default class Telegram {
   protected userId: number
   protected stringSession: StringSession
   protected client: TelegramClient
+  private static telegramChannelsRepository = AppDataSource.getRepository(TelegramChannel);
+  private static telegramSessionRepository = AppDataSource.getRepository(TelegramSession);
 
   constructor(userId: number, session?: string) {
     this.telegramSessionRepository = AppDataSource.getRepository(TelegramSession);
@@ -25,11 +27,16 @@ export default class Telegram {
   }
 
   static async getUserSession (userId: number): Promise<string> {
-    const telegramSessionRepository = AppDataSource.getRepository(TelegramSession);
-    const tgSession = await telegramSessionRepository.findOneBy({ user: {
+    const tgSession = await this.telegramSessionRepository.findOneBy({ user: {
       id: userId
     }})
 
     return tgSession?.session || "";
+  }
+
+  static async getSavedUserChannels(userId: number) {
+    return await this.telegramChannelsRepository.findBy({
+      user: { id: userId }
+    });
   }
 }
