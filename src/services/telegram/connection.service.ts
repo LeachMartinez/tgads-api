@@ -1,11 +1,7 @@
-import { Api } from "telegram";
-import Telegram from "./telegram.service";
+import { Api } from 'telegram'
+import Telegram from './telegram.service'
 
 export default class TelegramConnection extends Telegram {
-  constructor(userId: number, session?: string) {
-    super(userId, session)
-  }
-
   async sendCode (phoneNumber: string) {
     await this.client.connect()
     const res = await this.client.sendCode(
@@ -15,7 +11,7 @@ export default class TelegramConnection extends Telegram {
       },
       phoneNumber
     )
-    return {res, session: this.stringSession.save()}
+    return { res, session: this.stringSession.save() }
   }
 
   async auth (phoneNumber: string, phoneCode: string, phoneCodeHash: string) {
@@ -23,16 +19,16 @@ export default class TelegramConnection extends Telegram {
 
     await this.client.invoke(
       new Api.auth.SignIn({
-        phoneNumber: phoneNumber,
-        phoneCodeHash: phoneCodeHash,
-        phoneCode: phoneCode,
+        phoneNumber,
+        phoneCodeHash,
+        phoneCode
       })
-    );
+    )
 
     const session = await this.telegramSessionRepository.findOneBy({
       id: this.userId
-    });
-    
+    })
+
     if (!session) {
       const session = this.telegramSessionRepository.create({
         session: this.stringSession.save(),
@@ -40,13 +36,15 @@ export default class TelegramConnection extends Telegram {
           id: this.userId
         }
       })
-      await this.telegramSessionRepository.save(session);
+      await this.telegramSessionRepository.save(session)
     } else {
       this.telegramSessionRepository.update(session, {
         session: this.stringSession.save()
+      }).catch(e => {
+        console.log(e)
       })
     }
 
-    return "ok"
+    return 'ok'
   }
 }

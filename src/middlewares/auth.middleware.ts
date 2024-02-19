@@ -16,11 +16,11 @@ export default async (action: Action, roles: string[]) => {
     const accessToken = authorizationHeader.split(' ')[1] as string
     if (!accessToken) return false
     const userData = await new AuthorizationService().validateAccessToken(accessToken)
-    
+
     if (userData instanceof JsonWebTokenError) return false
     if (userData instanceof TokenExpiredError) return false
-    if (typeof userData === "string") return false
-    
+    if (typeof userData === 'string') return false
+
     const user = AppDataSource.getRepository(User)
     const authUser = await user.findOneBy({ id: userData.id })
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HeaderParam, Post, Res } from 'routing-controllers'
+import { Body, Controller, Get, HeaderParam, Post, Res } from 'routing-controllers'
 import { type User } from '../db/models/User'
 import { UserService } from '../services/user.service'
 import { Response } from 'express'
@@ -22,7 +22,7 @@ export class AuthController {
   }
 
   @Get('/refresh')
-  async refresh(@HeaderParam("authorization") token: string, @Res() response: Response) {
-    return this.userService.refresh(token.split(" ")[1], response)
+  async refresh (@HeaderParam('authorization') token: string, @Res() response: Response) {
+    return await this.userService.refresh(token.split(' ')[1], response)
   }
 }

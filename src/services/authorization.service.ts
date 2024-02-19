@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs'
-import jwt, { JsonWebTokenError } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { AppDataSource } from '../db/data-source'
 import { AuthToken } from '../db/models/AuthToken'
-import { type User } from '../db/models/User'
 import { type Repository } from 'typeorm'
 import { type TJwtUser } from 'src/types/User'
 

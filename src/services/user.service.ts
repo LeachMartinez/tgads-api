@@ -25,7 +25,7 @@ export class UserService {
     })
 
     if (findedUser.length > 0) return 'Пользователь уже зарегистрирован!'
-  
+
     const newUser = new User()
     newUser.email = user.email
     newUser.login = user.login
@@ -40,7 +40,7 @@ export class UserService {
     }
 
     const createdUser = await this.userRepository.save(newUser)
-    const tokens = new AuthorizationService().generateToken({ 
+    const tokens = new AuthorizationService().generateToken({
       id: createdUser.id,
       email: createdUser.email,
       login: createdUser.login,
@@ -58,67 +58,68 @@ export class UserService {
   }
 
   async auth (body: Pick<Partial<User>, 'email' | 'password' | 'login'>) {
-    console.log(body);
-    
-    if (!body.email && !body.login) return "не пришли нужные параметры";
-    if (!body.password) return "не пришли нужные параметры";
+    console.log(body)
+
+    if (!body.email && !body.login) return 'не пришли нужные параметры'
+    if (!body.password) return 'не пришли нужные параметры'
 
     const user = await this.userRepository.find({
       where: [
-        {email: body.email},
-        {login: body.login}
+        { email: body.email },
+        { login: body.login }
       ]
     })
 
-    if (user.length > 1) return "пользователей больше чем один!";
-    
-    if (!AuthorizationService.comparePassword(body.password, user[0].password)) return "forbidden"
+    if (user.length > 1) return 'пользователей больше чем один!'
 
-    const jwtUser = user[0] as Partial<User>;
-    delete jwtUser.password;
-    delete jwtUser.created_at;
-    delete jwtUser.updated_at;
+    if (!AuthorizationService.comparePassword(body.password, user[0].password)) return 'forbidden'
 
+    const jwtUser = user[0]
     await this.tokenRepository.delete({
       user: {
         id: user[0].id
       }
-    });
+    })
 
-    const tokens = new AuthorizationService().generateToken({...jwtUser } as Omit<User, "password" | "created_at" | "updated_at">)
+    const tokens = new AuthorizationService().generateToken({
+      id: jwtUser.id,
+      login: jwtUser.login,
+      name: jwtUser.name,
+      email: jwtUser.email
+    })
 
     this.tokenRepository.create({
       refreshToken: tokens.refreshToken
-    });
+    })
 
     return tokens
   }
 
   async refresh (token: string, response: Response) {
-    if (!token) return response.status(403);
+    if (!token) return response.status(403)
 
-    const authorizationService = new AuthorizationService();
-    const result = await authorizationService.validateRefreshToken(token);
+    const authorizationService = new AuthorizationService()
+    const result = await authorizationService.validateRefreshToken(token)
 
     if (result === null) return response.status(403)
 
     const currentToken = await this.tokenRepository.findOneBy({
       refreshToken: token
-    });
+    })
 
     if (!currentToken) return response.status(403)
-    
-    const accessToken = authorizationService.generateToken({ 
+
+    const accessToken = authorizationService.generateToken({
       id: result.id,
       email: result.email,
       login: result.login,
       name: result.name
-    }, 'access') as { accessToken: string };
+    }, 'access') as { accessToken: string }
 
     return accessToken
   }
 
-  async findUser(id: number) {
-    return await this.userRepository.findOneBy({ id });
+  async findUser (id: number) {
+    return await this.userRepository.findOneBy({ id })
   }
 }

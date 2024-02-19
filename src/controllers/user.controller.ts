@@ -1,6 +1,5 @@
-import { Request } from 'express'
 import 'reflect-metadata'
-import { Authorized, Controller, Get, Req } from 'routing-controllers'
+import { Authorized, Controller, Get } from 'routing-controllers'
 
 @Controller()
 export class UserController {
