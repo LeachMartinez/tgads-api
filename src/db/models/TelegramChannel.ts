@@ -21,7 +21,7 @@ export class TelegramChannel {
   @Column()
     about: string
 
-  @Column({ nullable: false, unique: true})
+  @Column({ nullable: false, unique: true })
     link: string
 
   @CreateDateColumn()

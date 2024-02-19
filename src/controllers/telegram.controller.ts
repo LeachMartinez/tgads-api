@@ -27,8 +27,8 @@ export class TelegramController {
     return await telegram.auth('79321270292', body.phoneCode, body.phoneCodeHash)
   }
 
-  @Get('/telegram/saved_channels/:user_id')
-  async savedChannels (@Param('user_id') userId: string) {
+  @Get('/telegram/saved_channels/:userId')
+  async savedChannels (@Param('userId') userId: string) {
     if (!userId) return
 
     return await Telegram.getSavedUserChannels(Number(userId))
@@ -44,6 +44,8 @@ export class TelegramController {
 
   @Get('/telegram/channels/:userId')
   async channels (@Param('userId') userId: string) {
+    console.log(1123)
+
     const session = await Telegram.getUserSession(Number(userId))
     const telegram = new TelegramChannels(Number(userId), session)
     return await telegram.getUserChannels()

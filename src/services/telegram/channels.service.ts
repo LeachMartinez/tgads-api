@@ -78,25 +78,28 @@ export default class TelegramChannels extends Telegram {
 
     const userChannelsInfo: TTelegramChannel[] = []
     for (let i = 0; i < userChannels.length; i++) {
+      let whereOptions: any = { tgChannelId: userChannels[i].id.toString(), user: { id: this.userId } }
+      if (userChannels[i].username) {
+        whereOptions = { tgUsername: userChannels[i].username, user: { id: this.userId } }
+      }
       const findedChannel = await this.telegramChannelsRepository.exists({
-        where: [
-          { tgUsername: userChannels[i].username, user: { id: this.userId } },
-          { tgChannelId: userChannels[i].id.toString(), user: { id: this.userId } }
-        ]
+        relations: { user: true },
+        where: whereOptions
       })
 
       const accessHash = userChannels[i].accessHash
-      const username = userChannels[i].username
 
-      if (!accessHash || !username) return
+      if (!accessHash) return
+
       userChannelsInfo.push({
         title: userChannels[i].title,
         channelId: userChannels[i].id.toString(),
         accessHash: accessHash.toString(),
-        username,
+        username: userChannels[i].username ?? '',
         addedToPlatform: findedChannel
       })
     }
+
     return userChannelsInfo
   }
 
@@ -107,7 +110,7 @@ export default class TelegramChannels extends Telegram {
     for (let i = 0; i < channels.length; i++) {
       const channelInfo = await this.client.invoke(
         new Api.channels.GetFullChannel({
-          channel: channels[i].username
+          channel: channels[i].username || channels[i].title
         })
       )
       // const photo = channelInfo.fullChat.chatPhoto?.className === "PhotoEmpty" ? undefined : channelInfo.fullChat.chatPhoto as Api.Photo
