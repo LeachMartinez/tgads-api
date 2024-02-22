@@ -26,25 +26,30 @@ export default class TelegramStatistics extends Telegram {
   }
 
   async analyze () {
-    // this.getBroadcastStats();
     await this.client.connect()
-    await this.getParticipants()
-    const messages = await this.getMessages() as Api.Message[]
+    if (!this.channel) return
+
+    const fullChannel = await this.getFullChannelByLink(this.channel.link.split('+')[1])
+    if (!fullChannel) return
+    await this.getParticipants(fullChannel)
+    const messages = await this.getMessages(fullChannel) as Api.Message[]
     const messagesAnalyzer = new TelegramMessageAnalyzeService(messages)
+    const stats = await this.getBroadcastStats(fullChannel)
     this.viewsAverage = messagesAnalyzer.viewsAverage
 
     console.log({
       participants: this.participants,
       viewsAverage: this.viewsAverage,
       averageEngagementRate: messagesAnalyzer.averageEngagementRate,
-      messagesPerDay: messagesAnalyzer.messagesPerDay
+      messagesPerDay: messagesAnalyzer.messagesPerDay,
+      broadcast: stats
     })
   }
 
-  private async getParticipants () {
+  private async getParticipants (fullChannel: Api.TypeChat) {
     const channelFull = await this.client.invoke(
       new Api.channels.GetFullChannel({
-        channel: this.channel?.tgUsername
+        channel: fullChannel
       })
     )
 
@@ -52,11 +57,11 @@ export default class TelegramStatistics extends Telegram {
   }
 
   // TODO: GET STATS OF PERIOD
-  async getMessages () {
+  private async getMessages (fullChannel: Api.TypeChat) {
     const messagesResult = await this.client.invoke(
       new Api.messages.GetHistory({
-        peer: this.channel?.tgUsername,
-        // @ts-expect-error api erorr
+        peer: fullChannel,
+        // @ts-expect-error ошибка приведения bigInt в BitInteger
         hash: BigInt('-4156887774564')
       })
     ) as Api.messages.Messages
@@ -65,5 +70,17 @@ export default class TelegramStatistics extends Telegram {
 
   getMessagesPerDay () {}
 
-  getBroadcastStats () {}
+  private async getBroadcastStats (fullChannel: Api.TypeChat) {
+    try {
+      const result = await this.client.invoke(
+        new Api.stats.GetBroadcastStats({
+          channel: fullChannel
+        })
+      )
+      return result
+    } catch (error) {
+      console.log(error)
+      return {}
+    }
+  }
 }

@@ -113,18 +113,21 @@ export default class TelegramChannels extends Telegram {
           channel: channels[i].username || channels[i].title
         })
       )
-      // const photo = channelInfo.fullChat.chatPhoto?.className === "PhotoEmpty" ? undefined : channelInfo.fullChat.chatPhoto as Api.Photo
+      const photo = await this.getChannelPhoto(channelInfo)
       const expInvite = channelInfo.fullChat.exportedInvite as Api.ChatInviteExported
-      channelsInfo.push({ link: expInvite.link, about: channelInfo.fullChat.about, ...channels[i] })
+      channelsInfo.push({ link: expInvite.link, about: channelInfo.fullChat.about, ...channels[i], photo })
     }
 
     return channelsInfo
   }
 
-  // private getChannelPhoto (photo: Api.Photo | undefined) {
+  private async getChannelPhoto (channel: Api.messages.ChatFull) {
+    if (channel.chats[0].className !== 'Channel') return undefined
 
-  //   if (!photo) return;
-  //   const size = photo.sizes.at(-1) as Api.PhotoStrippedSize;
-  //   return btoa(String.fromCharCode(...new Uint8Array(size.bytes)))
-  // }
+    const result = await this.client.downloadProfilePhoto(channel.chats[0])
+
+    if (!result) return undefined
+
+    return Buffer.from(result).toString('base64')
+  }
 }

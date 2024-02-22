@@ -18,11 +18,14 @@ export class TelegramChannel {
   @Column({ nullable: false, unique: true })
     tgUsername: string
 
-  @Column()
-    about: string
+  @Column({ nullable: false })
+    category: string
 
   @Column({ nullable: false, unique: true })
     link: string
+
+  @Column()
+    about: string
 
   @CreateDateColumn()
     created_at: Date

@@ -4,6 +4,7 @@ import Telegram from '../services/telegram/telegram.service'
 import TelegramChannels from '../services/telegram/channels.service'
 import { type TTelegramChannel } from '../types/Telegram'
 import TelegramStatistics from '../services/telegram/statistics.service'
+import categories from '../services/telegram/categories'
 
 @Controller()
 export class TelegramController {
@@ -37,15 +38,13 @@ export class TelegramController {
   @Get('/telegram/stats')
   async stats () {
     const session = await Telegram.getUserSession(18)
-    const stats = new TelegramStatistics(18, session, 38)
+    const stats = new TelegramStatistics(18, session, 39)
     await stats.analyze()
     return 'OK'
   }
 
   @Get('/telegram/channels/:userId')
   async channels (@Param('userId') userId: string) {
-    console.log(1123)
-
     const session = await Telegram.getUserSession(Number(userId))
     const telegram = new TelegramChannels(Number(userId), session)
     return await telegram.getUserChannels()
@@ -56,5 +55,10 @@ export class TelegramController {
     const session = await Telegram.getUserSession(18)
     const telegram = new TelegramChannels(18, session)
     return await telegram.saveChannels(userId, channels)
+  }
+
+  @Get('/telegram/categories')
+  categories () {
+    return categories
   }
 }

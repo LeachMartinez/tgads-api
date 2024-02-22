@@ -1,5 +1,5 @@
 import { StringSession } from 'telegram/sessions'
-import { TelegramClient } from 'telegram'
+import { Api, TelegramClient } from 'telegram'
 import { AppDataSource } from '../../db/data-source'
 import { TelegramSession } from '../../db/models/TelegramSession'
 import { type Repository } from 'typeorm'
@@ -24,6 +24,18 @@ export default class Telegram {
     this.client = new TelegramClient(this.stringSession, this.API_ID, this.API_HASH, {
       connectionRetries: 5
     })
+  }
+
+  protected async getFullChannelByLink (link: string) {
+    const result = await this.client.invoke(
+      new Api.messages.CheckChatInvite({
+        hash: link
+      })
+    )
+
+    if (result.className === 'ChatInviteAlready') {
+      return result.chat
+    }
   }
 
   static async getUserSession (userId: number): Promise<string> {

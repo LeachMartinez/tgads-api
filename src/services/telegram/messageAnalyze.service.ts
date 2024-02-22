@@ -10,6 +10,8 @@ export default class TelegramMessageAnalyzeService {
 
   get viewsAverage () {
     const messagesCount = this.messages.length
+    if (!messagesCount) return 0
+
     const allMessagesViews = this.messages.flatMap(message => Number(message.views)).reduce((prev, current) => {
       return prev + current
     })
@@ -20,6 +22,7 @@ export default class TelegramMessageAnalyzeService {
 
   get averageEngagementRate () {
     const engagementRates = this.messages.map(message => this.engagementRate(message))
+    if (!engagementRates.length) return 0
 
     return Number((engagementRates.reduce((prev, current) => prev + current) / engagementRates.length).toFixed(2))
   }
