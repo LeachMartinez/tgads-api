@@ -12,6 +12,7 @@ export default class Telegram {
   protected telegramChannelsRepository: Repository<TelegramChannel>
   protected userId: number
   protected stringSession: StringSession
+  protected session: string
   protected client: TelegramClient
   private static readonly telegramChannelsRepository = AppDataSource.getRepository(TelegramChannel)
   private static readonly telegramSessionRepository = AppDataSource.getRepository(TelegramSession)
@@ -20,6 +21,7 @@ export default class Telegram {
     this.telegramSessionRepository = AppDataSource.getRepository(TelegramSession)
     this.telegramChannelsRepository = AppDataSource.getRepository(TelegramChannel)
     this.userId = userId
+    this.session = session ?? ''
     this.stringSession = new StringSession(session ?? '')
     this.client = new TelegramClient(this.stringSession, this.API_ID, this.API_HASH, {
       connectionRetries: 5

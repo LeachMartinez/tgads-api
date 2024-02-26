@@ -46,7 +46,7 @@ export default class TelegramStatistics extends Telegram {
     })
   }
 
-  private async getParticipants (fullChannel: Api.TypeChat) {
+  async getParticipants (fullChannel: Api.TypeChat) {
     const channelFull = await this.client.invoke(
       new Api.channels.GetFullChannel({
         channel: fullChannel
@@ -54,6 +54,7 @@ export default class TelegramStatistics extends Telegram {
     )
 
     this.participants = (channelFull.fullChat as Api.ChannelFull).participantsCount
+    return this.participants
   }
 
   // TODO: GET STATS OF PERIOD

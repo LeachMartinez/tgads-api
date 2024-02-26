@@ -113,9 +113,12 @@ export default class TelegramChannels extends Telegram {
           channel: channels[i].username || channels[i].title
         })
       )
+
+      if (channelInfo.fullChat.className !== 'ChannelFull') continue
+
       const photo = await this.getChannelPhoto(channelInfo)
       const expInvite = channelInfo.fullChat.exportedInvite as Api.ChatInviteExported
-      channelsInfo.push({ link: expInvite.link, about: channelInfo.fullChat.about, ...channels[i], photo })
+      channelsInfo.push({ ...channels[i], link: expInvite.link, about: channelInfo.fullChat.about, photo, participants: channelInfo.fullChat.participantsCount })
     }
 
     return channelsInfo

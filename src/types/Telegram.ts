@@ -7,11 +7,11 @@ export interface TTelegramChannel {
   link?: string
   photo?: string
   addedToPlatform?: boolean
+  participants?: number
   statistics?: TTelegramStatistics
 }
 
 export interface TTelegramStatistics {
-  participants: number
   averageEngagementRate: number
   viewsAverage: number
   period?: 'all' | 'month' | 'day' | 'year'
