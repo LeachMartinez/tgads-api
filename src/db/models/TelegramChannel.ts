@@ -18,14 +18,29 @@ export class TelegramChannel {
   @Column({ nullable: false, unique: true })
     tgUsername: string
 
-  @Column({ nullable: false })
-    category: string
-
   @Column({ nullable: false, unique: true })
     link: string
 
   @Column()
     about: string
+
+  @Column('text', {
+    array: true,
+    default: []
+  })
+    categories: string[]
+
+  @Column()
+    adFormat: string
+
+  @Column()
+    slotsCount: number
+
+  @Column()
+    price: number
+
+  @Column()
+    priceOnFixedPost: number
 
   @CreateDateColumn()
     created_at: Date

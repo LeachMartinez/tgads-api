@@ -31,13 +31,23 @@ export default class Telegram {
   protected async getFullChannelByLink (link: string) {
     const result = await this.client.invoke(
       new Api.messages.CheckChatInvite({
-        hash: link
+        hash: link.split('+')[1]
       })
     )
 
     if (result.className === 'ChatInviteAlready') {
       return result.chat
     }
+  }
+
+  protected getFullChannelByLinks (links: string[]) {
+    return links.map(async link => {
+      return await this.client.invoke(
+        new Api.messages.CheckChatInvite({
+          hash: link.split('+')[1]
+        })
+      )
+    })
   }
 
   static async getUserSession (userId: number): Promise<string> {
@@ -48,11 +58,5 @@ export default class Telegram {
     })
 
     return tgSession?.session ?? ''
-  }
-
-  static async getSavedUserChannels (userId: number) {
-    return await this.telegramChannelsRepository.findBy({
-      user: { id: userId }
-    })
   }
 }

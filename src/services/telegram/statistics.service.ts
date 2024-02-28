@@ -29,7 +29,7 @@ export default class TelegramStatistics extends Telegram {
     await this.client.connect()
     if (!this.channel) return
 
-    const fullChannel = await this.getFullChannelByLink(this.channel.link.split('+')[1])
+    const fullChannel = await this.getFullChannelByLink(this.channel.link)
     if (!fullChannel) return
     await this.getParticipants(fullChannel)
     const messages = await this.getMessages(fullChannel) as Api.Message[]

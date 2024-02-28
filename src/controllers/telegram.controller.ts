@@ -30,9 +30,12 @@ export class TelegramController {
 
   @Get('/telegram/saved_channels/:userId')
   async savedChannels (@Param('userId') userId: string) {
-    if (!userId) return
+    if (!userId) return 'no user'
 
-    return await Telegram.getSavedUserChannels(Number(userId))
+    const session = await Telegram.getUserSession(Number(userId))
+    const telegram = new TelegramChannels(Number(userId), session)
+
+    return await telegram.getSavedUserChannels(Number(userId))
   }
 
   @Get('/telegram/stats')
@@ -51,10 +54,10 @@ export class TelegramController {
   }
 
   @Post('/telegram/channels')
-  async addChannels (@Body() { userId, channels }: { userId: number, channels: TTelegramChannel[] }) {
-    const session = await Telegram.getUserSession(18)
-    const telegram = new TelegramChannels(18, session)
-    return await telegram.saveChannels(userId, channels)
+  async addChannels (@Body() { userId, channel }: { userId: number, channel: TTelegramChannel }) {
+    const session = await Telegram.getUserSession(userId)
+    const telegram = new TelegramChannels(userId, session)
+    return await telegram.saveChannels(userId, channel)
   }
 
   @Get('/telegram/categories')

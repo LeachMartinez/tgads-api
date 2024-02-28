@@ -9,6 +9,11 @@ export interface TTelegramChannel {
   addedToPlatform?: boolean
   participants?: number
   statistics?: TTelegramStatistics
+  categories?: string[]
+  adFormat?: string
+  slotsCount?: number
+  price?: number
+  priceOnFixedPost?: number
 }
 
 export interface TTelegramStatistics {

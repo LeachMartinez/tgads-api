@@ -13,33 +13,43 @@ export default class TelegramChannels extends Telegram {
     return await this.getUserChannelsInfo(userChannels)
   }
 
-  async saveChannels (userId: number, channels: TTelegramChannel[]) {
+  async saveChannels (userId: number, channel: TTelegramChannel) {
     const user = await new UserService().findUser(userId)
-    if (!user) return
+    if (!user) return 'user not found'
 
-    for (let i = 0; i < channels.length; i++) {
-      const findedChannel = await this.telegramChannelsRepository.findOne({
-        where: [
-          { tgUsername: channels[i].username },
-          { title: channels[i].title }
-        ]
-      })
-      if (findedChannel) return 'nope'
+    const findedChannel = await this.telegramChannelsRepository.findOne({
+      where: [
+        { tgUsername: channel.username },
+        { title: channel.title }
+      ]
+    })
+    if (findedChannel) return 'nope'
 
-      const createdChannel = this.telegramChannelsRepository.create({
-        link: channels[i].link,
-        title: channels[i].title,
-        tgAccessHash: channels[i].accessHash,
-        tgChannelId: channels[i].channelId,
-        tgUsername: channels[i].username,
-        about: channels[i].about,
-        user
-      })
+    const createdChannel = this.telegramChannelsRepository.create({
+      price: channel.price,
+      adFormat: channel.adFormat,
+      priceOnFixedPost: channel.priceOnFixedPost,
+      categories: channel.categories,
+      slotsCount: channel.slotsCount,
+      link: channel.link,
+      title: channel.title,
+      tgAccessHash: channel.accessHash,
+      tgChannelId: channel.channelId,
+      tgUsername: channel.username,
+      about: channel.about,
+      user
+    })
 
-      await this.telegramChannelsRepository.save(createdChannel)
-    }
+    await this.telegramChannelsRepository.save(createdChannel)
 
     return 'ok'
+  }
+
+  async getSavedUserChannels (userId: number) {
+    const savedChannels = await this.telegramChannelsRepository.findBy({
+      user: { id: userId }
+    })
+    return savedChannels
   }
 
   private getChannelIds (dialogs: Api.messages.Dialogs) {
@@ -118,7 +128,13 @@ export default class TelegramChannels extends Telegram {
 
       const photo = await this.getChannelPhoto(channelInfo)
       const expInvite = channelInfo.fullChat.exportedInvite as Api.ChatInviteExported
-      channelsInfo.push({ ...channels[i], link: expInvite.link, about: channelInfo.fullChat.about, photo, participants: channelInfo.fullChat.participantsCount })
+      channelsInfo.push({
+        ...channels[i],
+        photo,
+        link: expInvite.link,
+        about: channelInfo.fullChat.about,
+        participants: channelInfo.fullChat.participantsCount
+      })
     }
 
     return channelsInfo
