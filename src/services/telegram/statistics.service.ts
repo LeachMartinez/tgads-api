@@ -37,13 +37,13 @@ export default class TelegramStatistics extends Telegram {
     const stats = await this.getBroadcastStats(fullChannel)
     this.viewsAverage = messagesAnalyzer.viewsAverage
 
-    console.log({
+    return {
       participants: this.participants,
       viewsAverage: this.viewsAverage,
       averageEngagementRate: messagesAnalyzer.averageEngagementRate,
       messagesPerDay: messagesAnalyzer.messagesPerDay,
       broadcast: stats
-    })
+    }
   }
 
   async getParticipants (fullChannel: Api.TypeChat) {

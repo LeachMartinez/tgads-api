@@ -2,6 +2,7 @@ import { Api } from 'telegram'
 import Telegram from './telegram.service'
 import { UserService } from '../user.service'
 import { type TTelegramChannel } from 'src/types/Telegram'
+// import { ErrorHandler } from '../../middlewares/error.handler'
 
 export default class TelegramChannels extends Telegram {
   async getUserChannels () {
@@ -46,6 +47,8 @@ export default class TelegramChannels extends Telegram {
   }
 
   async getSavedUserChannels (userId: number) {
+    // throw new ErrorHandler(422, 'eee')
+
     const savedChannels = await this.telegramChannelsRepository.findBy({
       user: { id: userId }
     })
@@ -54,8 +57,9 @@ export default class TelegramChannels extends Telegram {
 
   private getChannelIds (dialogs: Api.messages.Dialogs) {
     return dialogs.dialogs.flatMap(dialog => {
-      const peer = dialog.peer as Api.PeerChannel
-      return peer.channelId ? peer.channelId.toString() : []
+      if (dialog.peer.className !== 'PeerChannel') return []
+
+      return dialog.peer.channelId ? dialog.peer.channelId.toString() : []
     })
   }
 
@@ -81,63 +85,47 @@ export default class TelegramChannels extends Telegram {
   }
 
   private async getUserChannelsList (channels: Api.messages.Chats) {
-    const userChannels = channels.chats.filter(chat => {
-      chat = chat as Api.Channel
-      return chat.adminRights
-    }) as Api.Channel[]
+    const userChannels = channels.chats.filter(chat => chat.className === 'Channel' && chat.adminRights) as Api.Channel[]
 
-    const userChannelsInfo: TTelegramChannel[] = []
-    for (let i = 0; i < userChannels.length; i++) {
-      let whereOptions: any = { tgChannelId: userChannels[i].id.toString(), user: { id: this.userId } }
-      if (userChannels[i].username) {
-        whereOptions = { tgUsername: userChannels[i].username, user: { id: this.userId } }
-      }
+    return await Promise.all(userChannels.map(async (channel) => {
       const findedChannel = await this.telegramChannelsRepository.exists({
         relations: { user: true },
-        where: whereOptions
+        where: { tgChannelId: channel.id.toString(), user: { id: this.userId } }
       })
 
-      const accessHash = userChannels[i].accessHash
-
-      if (!accessHash) return
-
-      userChannelsInfo.push({
-        title: userChannels[i].title,
-        channelId: userChannels[i].id.toString(),
-        accessHash: accessHash.toString(),
-        username: userChannels[i].username ?? '',
+      return {
+        title: channel.title,
+        channelId: channel.id.toString(),
+        accessHash: channel.accessHash?.toString(),
+        username: channel.username ?? '',
         addedToPlatform: findedChannel
-      })
-    }
-
-    return userChannelsInfo
+      }
+    })) satisfies TTelegramChannel[]
   }
 
-  private async getUserChannelsInfo (channels: TTelegramChannel[] | undefined) {
-    if (!channels) return
-
-    const channelsInfo: TTelegramChannel[] = []
-    for (let i = 0; i < channels.length; i++) {
+  private async getUserChannelsInfo (channels: TTelegramChannel[]) {
+    return await Promise.all(channels.map(async channel => {
       const channelInfo = await this.client.invoke(
         new Api.channels.GetFullChannel({
-          channel: channels[i].username || channels[i].title
+          channel: channel.username || channel.title
         })
       )
 
-      if (channelInfo.fullChat.className !== 'ChannelFull') continue
+      if (channelInfo.fullChat.className !== 'ChannelFull') return null
 
-      const photo = await this.getChannelPhoto(channelInfo)
-      const expInvite = channelInfo.fullChat.exportedInvite as Api.ChatInviteExported
-      channelsInfo.push({
-        ...channels[i],
-        photo,
-        link: expInvite.link,
+      let link = ''
+      if (channelInfo.fullChat.exportedInvite?.className === 'ChatInviteExported') {
+        link = channelInfo.fullChat.exportedInvite?.link
+      }
+
+      return {
+        ...channel,
+        photo: await this.getChannelPhoto(channelInfo),
+        link,
         about: channelInfo.fullChat.about,
         participants: channelInfo.fullChat.participantsCount
-      })
-    }
-
-    return channelsInfo
+      }
+    }))
   }
 
   private async getChannelPhoto (channel: Api.messages.ChatFull) {

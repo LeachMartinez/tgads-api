@@ -1,7 +1,7 @@
 export interface TTelegramChannel {
   title: string
   channelId: string
-  accessHash: string
+  accessHash?: string
   username: string
   about?: string
   link?: string
