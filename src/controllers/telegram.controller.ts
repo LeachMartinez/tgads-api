@@ -62,6 +62,12 @@ export class TelegramController {
     return await telegram.saveChannels(userId, channel)
   }
 
+  @Get('/telegram/channel/:channelId')
+  async channel (@Param('channelId') channelId: string) {
+    const telegram = new TelegramChannels()
+    return await telegram.getChannel(Number(channelId))
+  }
+
   @Get('/telegram/categories')
   categories () {
     return categories

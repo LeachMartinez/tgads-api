@@ -25,20 +25,20 @@ export default class TelegramConnection extends Telegram {
       })
     )
 
-    const session = await this.telegramSessionRepository.findOneBy({
+    const session = await this.tgSessionRep.findOneBy({
       id: this.userId
     })
 
     if (!session) {
-      const session = this.telegramSessionRepository.create({
+      const session = this.tgSessionRep.create({
         session: this.stringSession.save(),
         user: {
           id: this.userId
         }
       })
-      await this.telegramSessionRepository.save(session)
+      await this.tgSessionRep.save(session)
     } else {
-      this.telegramSessionRepository.update(session, {
+      this.tgSessionRep.update(session, {
         session: this.stringSession.save()
       }).catch(e => {
         console.log(e)

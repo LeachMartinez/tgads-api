@@ -8,18 +8,18 @@ import { TelegramChannel } from '../../db/models/TelegramChannel'
 export default class Telegram {
   protected API_ID = Number(process.env.TG_API_ID)
   protected API_HASH = process.env.TG_API_HASH ?? ''
-  protected telegramSessionRepository: Repository<TelegramSession>
-  protected telegramChannelsRepository: Repository<TelegramChannel>
-  protected userId: number
+  protected tgSessionRep: Repository<TelegramSession>
+  protected tgChannelRep: Repository<TelegramChannel>
+  protected userId: number | undefined
   protected stringSession: StringSession
   protected session: string
   protected client: TelegramClient
-  private static readonly telegramChannelsRepository = AppDataSource.getRepository(TelegramChannel)
-  private static readonly telegramSessionRepository = AppDataSource.getRepository(TelegramSession)
+  private static readonly tgChannelRep = AppDataSource.getRepository(TelegramChannel)
+  private static readonly tgSessionRep = AppDataSource.getRepository(TelegramSession)
 
-  constructor (userId: number, session?: string) {
-    this.telegramSessionRepository = AppDataSource.getRepository(TelegramSession)
-    this.telegramChannelsRepository = AppDataSource.getRepository(TelegramChannel)
+  constructor (userId?: number, session?: string) {
+    this.tgSessionRep = AppDataSource.getRepository(TelegramSession)
+    this.tgChannelRep = AppDataSource.getRepository(TelegramChannel)
     this.userId = userId
     this.session = session ?? ''
     this.stringSession = new StringSession(session ?? '')
@@ -50,8 +50,13 @@ export default class Telegram {
     })
   }
 
+  async getChannel (channelId: number) {
+    const channel = await this.tgChannelRep.findOneBy({ id: channelId })
+    return channel
+  }
+
   static async getUserSession (userId: number): Promise<string> {
-    const tgSession = await this.telegramSessionRepository.findOneBy({
+    const tgSession = await this.tgSessionRep.findOneBy({
       user: {
         id: userId
       }

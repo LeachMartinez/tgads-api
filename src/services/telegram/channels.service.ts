@@ -18,7 +18,7 @@ export default class TelegramChannels extends Telegram {
     const user = await new UserService().findUser(userId)
     if (!user) return 'user not found'
 
-    const findedChannel = await this.telegramChannelsRepository.findOne({
+    const findedChannel = await this.tgChannelRep.findOne({
       where: [
         { tgUsername: channel.username },
         { title: channel.title }
@@ -26,7 +26,7 @@ export default class TelegramChannels extends Telegram {
     })
     if (findedChannel) return 'nope'
 
-    const createdChannel = this.telegramChannelsRepository.create({
+    const createdChannel = this.tgChannelRep.create({
       price: channel.price,
       adFormat: channel.adFormat,
       priceOnFixedPost: channel.priceOnFixedPost,
@@ -41,7 +41,7 @@ export default class TelegramChannels extends Telegram {
       user
     })
 
-    await this.telegramChannelsRepository.save(createdChannel)
+    await this.tgChannelRep.save(createdChannel)
 
     return 'ok'
   }
@@ -49,7 +49,7 @@ export default class TelegramChannels extends Telegram {
   async getSavedUserChannels (userId: number) {
     // throw new ErrorHandler(422, 'eee')
 
-    const savedChannels = await this.telegramChannelsRepository.findBy({
+    const savedChannels = await this.tgChannelRep.findBy({
       user: { id: userId }
     })
     return savedChannels
@@ -88,7 +88,7 @@ export default class TelegramChannels extends Telegram {
     const userChannels = channels.chats.filter(chat => chat.className === 'Channel' && chat.adminRights) as Api.Channel[]
 
     return await Promise.all(userChannels.map(async (channel) => {
-      const findedChannel = await this.telegramChannelsRepository.exists({
+      const findedChannel = await this.tgChannelRep.exists({
         relations: { user: true },
         where: { tgChannelId: channel.id.toString(), user: { id: this.userId } }
       })

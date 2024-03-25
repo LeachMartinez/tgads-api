@@ -20,9 +20,10 @@ export default class TelegramStatistics extends Telegram {
   }
 
   async getChannel () {
-    this.channel = await this.telegramChannelsRepository.findOneBy({
+    this.channel = await this.tgChannelRep.findOneBy({
       id: this.channelId
     })
+    return this.channel
   }
 
   async analyze () {
