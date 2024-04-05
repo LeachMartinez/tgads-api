@@ -12,8 +12,8 @@ export default class TelegramStatistics extends Telegram {
   messagePerDay: number
   period: string
 
-  constructor (userId: number, session: string, channeId: number, period: string = 'all') {
-    super(userId, session)
+  constructor (session: string, channeId: number, period: string = 'all') {
+    super(session)
     this.channelId = channeId
     this.period = period
     this.getChannel().catch(e => { console.log(e) })
